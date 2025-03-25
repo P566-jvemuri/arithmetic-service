@@ -1,10 +1,15 @@
 package edu.iu.p566.arithmetic_service.controller;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 @RestController
 @CrossOrigin
 public class HomeController {
-    @GetMappings
-    public String greetings(){
+
+    @GetMapping("/")
+    public String greetings() {
         return "welcome to arithmetic services";
     }
 }
