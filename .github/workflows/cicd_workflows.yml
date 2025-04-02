@@ -1,36 +1,41 @@
-name: Docker Image CI for GHCR
+name: Docker Image CI for GHCR and ACR
 
 on:
   push:
     branches:
-      - main  # Or whichever branch you are using
+      - main  # Or your designated branch
 
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.sha }}
+      CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+      CONTAINER_REGISTRY_UN: ${{ secrets.AZURE_CONTAINER_REGISTRY_UN }}
+      CONTAINER_REGISTRY_PW: ${{ secrets.AZURE_CONTAINER_REGISTRY_PW }}
 
     steps:
       # Step 1: Checkout the repository
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
       # Step 2: Set up JDK 17
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'adopt'
+          java-version: '17'
 
       # Step 3: Build the package (skip tests for faster builds)
-      - name: Build the package (no tests)
+      - name: Build the package (skip tests)
         run: mvn --batch-mode -DskipTests package
 
       # Step 4: Run unit tests
-      - name: Run the unit tests
+      - name: Run Unit Tests
         run: mvn --batch-mode -Dmaven.test.failure.ignore=true test
 
-      # Step 5: Report test results (if needed)
-      - name: Report test results
+      # Step 5: Report test results
+      - name: Report Test Results
         if: always()
         uses: dorny/test-reporter@v1
         with:
@@ -39,16 +44,26 @@ jobs:
           reporter: java-junit
           fail-on-error: true
 
-      # Step 6: Publish the image to GitHub Container Registry
-      - name: Publish the image to GitHub Container Registry (GHCR)
+      # Step 6: Publish the image to GitHub Container Registry (GHCR)
+      - name: Publish Image to GitHub Container Registry (GHCR)
         run: |
-          docker login --username jahnavi-vemuri --password ${{ secrets.ACCESS_TOKEN }} ghcr.io
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u jahnavi-vemuri --password-stdin
           docker build -t ghcr.io/jahnavi-vemuri/arithmetic-service:latest --file Dockerfile .
           docker push ghcr.io/jahnavi-vemuri/arithmetic-service:latest
 
       # Step 7: Publish the image to Azure Container Registry (ACR)
-      - name: Publish the image to Azure Container Registry (ACR)
+      - name: Publish Image to Azure Container Registry (ACR)
         run: |
-          docker login --username p566spring2025 --password ${{ secrets.AZURE_CONTAINER_REGISTRY }} p566spring2025.azurecr.io
-          docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:latest p566spring2025.azurecr.io/arithmetic-service:latest
-          docker push p566spring2025.azurecr.io/arithmetic-service:latest
+          echo "$CONTAINER_REGISTRY_PW" | docker login $CONTAINER_REGISTRY -u $CONTAINER_REGISTRY_UN --password-stdin
+          docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:latest $CONTAINER_REGISTRY/arithmetic-service:latest
+          docker push $CONTAINER_REGISTRY/arithmetic-service:latest
+
+      # Step 8: Configure kubectl
+      - name: Configure kubectl
+        uses: tale/kubectl-action@v1
+        with:
+          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+
+      # Step 9: Deploy to Kubernetes
+      - name: Deploy to Kubernetes
+        run: ./deploy.sh
