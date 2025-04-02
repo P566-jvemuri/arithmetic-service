@@ -54,9 +54,9 @@ jobs:
       # Step 7: Publish the image to Azure Container Registry (ACR)
       - name: Publish Image to Azure Container Registry (ACR)
         run: |
-          echo "$CONTAINER_REGISTRY_PW" | docker login $CONTAINER_REGISTRY -u $CONTAINER_REGISTRY_UN --password-stdin
-          docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:latest $CONTAINER_REGISTRY/arithmetic-service:latest
-          docker push $CONTAINER_REGISTRY/arithmetic-service:latest
+          echo "$AZURE_CONTAINER_REGISTRY_PW" | docker login p566spring2025 -u $AZURE_CONTAINER_REGISTRY_UN --password-stdin
+          docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:latest p566spring2025/arithmetic-service:latest
+          docker push p566spring2025/arithmetic-service:latest
 
       # Step 8: Configure kubectl
       - name: Configure kubectl
