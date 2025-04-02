@@ -52,7 +52,7 @@ jobs:
       # Step 7: Publish the image to Azure Container Registry (ACR)
       - name: Publish Image to Azure Container Registry (ACR)
         run: |
-          echo "$AZURE_CONTAINER_REGISTRY_PW" | docker login p566spring2025.azurecr.io -u $AZURE_CONTAINER_REGISTRY_UN --password-stdin
+          echo "${{ secrets.AZURE_CONTAINER_REGISTRY_PW }}" | docker login p566spring2025.azurecr.io -u ${{ secrets.AZURE_CONTAINER_REGISTRY_UN }} --password-stdin
           docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:latest p566spring2025.azurecr.io/arithmetic-service:latest
           docker push p566spring2025.azurecr.io/arithmetic-service:latest
 
