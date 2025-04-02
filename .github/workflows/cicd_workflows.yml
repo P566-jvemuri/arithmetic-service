@@ -9,6 +9,8 @@ jobs:
   build_and_publish:
     runs-on: ubuntu-latest
     env:
+      VERSION: ${{github.sha}}
+      CONTAINER_REGISTRY: ${{secrets.AZURE_CONTAINER_REGISTRY}}
       CONTAINER_REGISTRY_UN: ${{ secrets.AZURE_CONTAINER_REGISTRY_UN }}
       CONTAINER_REGISTRY_PW: ${{ secrets.AZURE_CONTAINER_REGISTRY_PW }}
 
@@ -45,16 +47,16 @@ jobs:
       # Step 6: Publish the image to GitHub Container Registry (GHCR)
       - name: Publish Image to GitHub Container Registry (GHCR)
         run: |
-          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u jahnavi-vemuri --password-stdin
-          docker build -t ghcr.io/jahnavi-vemuri/arithmetic-service:latest --file Dockerfile .
-          docker push ghcr.io/jahnavi-vemuri/arithmetic-service:latest
+          docker login --username jahnavi-vemuri --password ${{secrets.ACCESS_TOKEN}} ghcr.io
+          docker build -t ghcr.io/jahnavi-vemuri/arithmetic-service:$VERSION --file Dockerfile .
+          docker push ghcr.io/jahnavi-vemuri/arithmetic-service:$VERSION
 
       # Step 7: Publish the image to Azure Container Registry (ACR)
       - name: Publish Image to Azure Container Registry (ACR)
         run: |
-          echo "${{ secrets.AZURE_CONTAINER_REGISTRY_PW }}" | docker login p566spring2025.azurecr.io -u ${{ secrets.AZURE_CONTAINER_REGISTRY_UN }} --password-stdin
-          docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:latest p566spring2025.azurecr.io/arithmetic-service:latest
-          docker push p566spring2025.azurecr.io/arithmetic-service:latest
+          docker login --username $CONTAINER_REGISTRY_UN --password $CONTAINER_REGISTRY_PW $CONTAINER_REGISTRY
+          docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:$VERSION $CONTAINER_REGISTRY/arithmetic-service:$VVERSION
+          docker push $CONTAINER_REGISTRY/arithmetic-service:$VERSION
 
       # Step 8: Configure kubectl
       - name: Configure kubectl
@@ -63,5 +65,5 @@ jobs:
           base64-kube-config: ${{ secrets.KUBE_CONFIG }}
 
       # Step 9: Deploy to Kubernetes
-      - name: Deploy to Kubernetes
+      - name: Deploy
         run: ./deploy.sh
