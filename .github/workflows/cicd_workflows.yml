@@ -9,8 +9,6 @@ jobs:
   build_and_publish:
     runs-on: ubuntu-latest
     env:
-      VERSION: ${{ github.sha }}
-      CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
       CONTAINER_REGISTRY_UN: ${{ secrets.AZURE_CONTAINER_REGISTRY_UN }}
       CONTAINER_REGISTRY_PW: ${{ secrets.AZURE_CONTAINER_REGISTRY_PW }}
 
@@ -55,8 +53,8 @@ jobs:
       - name: Publish Image to Azure Container Registry (ACR)
         run: |
           echo "$AZURE_CONTAINER_REGISTRY_PW" | docker login p566spring2025 -u $AZURE_CONTAINER_REGISTRY_UN --password-stdin
-          docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:latest p566spring2025/arithmetic-service:latest
-          docker push p566spring2025/arithmetic-service:latest
+          docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:latest p566spring2025.azurecr.io/arithmetic-service:latest
+          docker push p566spring2025.azurecr.io/arithmetic-service:latest
 
       # Step 8: Configure kubectl
       - name: Configure kubectl
