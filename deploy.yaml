@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: arithmetic-service
-          image: $CONTAINER_REGISTRY/arithmetic-service:latest
+          image: p566spring2025/arithmetic-service:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: PORT
