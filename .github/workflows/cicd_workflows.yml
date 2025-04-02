@@ -1,3 +1,74 @@
+#name: Docker Image CI for GHCR and ACR
+#
+#on:
+#  push:
+#    branches:
+#      - main  # Or your designated branch
+#
+#jobs:
+#  build_and_publish:
+#    runs-on: ubuntu-latest
+#    env:
+#      VERSION: ${{github.sha}}
+#      CONTAINER_REGISTRY: ${{secrets.AZURE_CONTAINER_REGISTRY}}
+#      CONTAINER_REGISTRY_UN: ${{ secrets.AZURE_CONTAINER_REGISTRY_UN }}
+#      CONTAINER_REGISTRY_PW: ${{ secrets.AZURE_CONTAINER_REGISTRY_PW }}
+#
+#    steps:
+#      # Step 1: Checkout the repository
+#      - name: Checkout Code
+#        uses: actions/checkout@v3
+#
+#      # Step 2: Set up JDK 17
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v3
+#        with:
+#          distribution: 'adopt'
+#          java-version: '17'
+#
+#      # Step 3: Build the package (skip tests for faster builds)
+#      - name: Build the package (skip tests)
+#        run: mvn --batch-mode -DskipTests package
+#
+#      # Step 4: Run unit tests
+#      - name: Run Unit Tests
+#        run: mvn --batch-mode -Dmaven.test.failure.ignore=true test
+#
+#      # Step 5: Report test results
+#      - name: Report Test Results
+#        if: always()
+#        uses: dorny/test-reporter@v1
+#        with:
+#          name: Maven Tests
+#          path: target/surefire-reports/*.xml
+#          reporter: java-junit
+#          fail-on-error: true
+#
+#      # Step 6: Publish the image to GitHub Container Registry (GHCR)
+#      - name: Publish Image to GitHub Container Registry (GHCR)
+#        run: |
+#          docker login --username jahnavi-vemuri --password ${{secrets.ACCESS_TOKEN}} ghcr.io
+#          docker build -t ghcr.io/jahnavi-vemuri/arithmetic-service:$VERSION --file Dockerfile .
+#          docker push ghcr.io/jahnavi-vemuri/arithmetic-service:$VERSION
+#
+#      # Step 7: Publish the image to Azure Container Registry (ACR)
+#      - name: Publish Image to Azure Container Registry (ACR)
+#        run: |
+#          docker login --username $CONTAINER_REGISTRY_UN --password $CONTAINER_REGISTRY_PW $CONTAINER_REGISTRY
+#          docker tag ghcr.io/jahnavi-vemuri/arithmetic-service:$VERSION $CONTAINER_REGISTRY/arithmetic-service:$VERSION
+#          docker push $CONTAINER_REGISTRY/arithmetic-service:$VERSION
+#
+#      # Step 8: Configure kubectl
+#      - name: Configure kubectl
+#        uses: tale/kubectl-action@v1
+#        with:
+#          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+#
+#      # Step 9: Deploy to Kubernetes
+#      - name: Deploy
+#        run: ./deploy.sh
+
+
 name: Docker Image CI for GHCR and ACR
 
 on:
@@ -64,6 +135,10 @@ jobs:
         with:
           base64-kube-config: ${{ secrets.KUBE_CONFIG }}
 
-      # Step 9: Deploy to Kubernetes
+      # Step 9: Ensure deploy.sh has execute permissions
+      - name: Set execute permissions for deploy.sh
+        run: chmod +x ./deploy.sh
+
+      # Step 10: Deploy to Kubernetes
       - name: Deploy
         run: ./deploy.sh
