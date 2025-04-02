@@ -66,32 +66,32 @@ jobs:
 
       # Step 9: Ensure deploy.sh has execute permissions
       - name: Set execute permissions for deploy.sh
-        run: chmod +x ./deploy.sh
+        run: chmod +x ./scripts/deploy.sh
 
       # Step 10: Deploy to Kubernetes
       - name: Deploy
-        run: ./deploy.sh
+        run: ./scripts/deploy.sh
 
       # Step 11: Ensure deploy.sh has execute permissions
       - name: Set execute permissions for build-image.sh
-        run: chmod +x ./build-image.sh
+        run: chmod +x ./scripts/build-image.sh
 
       # Step 12: Deploy to Kubernetes
       - name: Deploy
-        run: ./build-image.sh
+        run: ./scripts/build-image.sh
 
       # Step 13: Ensure deploy.sh has execute permissions
       - name: Set execute permissions for push-to-ghcr.sh
-        run: chmod +x ./push-to-ghcr.sh
+        run: chmod +x ./scripts/push-to-ghcr.sh
 
       # Step 14: Deploy to Kubernetes
       - name: Deploy
-        run: ./push-to-ghcr.sh
+        run: ./scripts/push-to-ghcr.sh
 
       # Step 15: Ensure deploy.sh has execute permissions
       - name: Set execute permissions for push-to-acr.sh
-        run: chmod +x ./push-to-acr.sh
+        run: chmod +x ./scripts/push-to-acr.sh
 
       # Step 16: Deploy to Kubernetes
       - name: Deploy
-        run: ./push-to-acr.sh
+        run: ./scripts/push-to-acr.sh
